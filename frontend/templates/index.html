@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MindCheck — DASS-21 Mental Health Assessment</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <img src="../static/images/logo.png"
+         alt="MindCheck Logo"
+         class="logo-img">
+
+      <span class="logo-text">MindCheck</span>
+    </div>
+    <nav class="header-nav">
+      <a href="#assessment">Take Assessment</a>
+      <a href="#about">About</a>
+      <a href="#api-docs">API</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── HERO ────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Understand Your Mental Health</h1>
+    <p class="hero-sub">
+      A research-grade DASS-21 based assessment that predicts your Stress, Anxiety,
+      and Depression severity — powered by an AI ensemble model with <strong>74% Kappa accuracy</strong>.
+    </p>
+    <div class="hero-badges">
+      <span class="badge">🔬 Research-based</span>
+      <span class="badge">🔒 No data stored</span>
+      <span class="badge">⚡ Instant results</span>
+      <span class="badge">🆓 Completely free</span>
+    </div>
+    <button class="btn-primary" onclick="startAssessment()">Start Assessment →</button>
+    <p class="disclaimer-small">
+      ⚠️ For informational purposes only. Not a clinical diagnosis.
+    </p>
+  </div>
+  <div class="hero-visual">
+    <div class="stat-card"><div class="stat-num">1,812</div><div class="stat-label">Training samples</div></div>
+    <div class="stat-card"><div class="stat-num">0.742</div><div class="stat-label">Best Accuracy</div></div>
+    <div class="stat-card"><div class="stat-num">21</div><div class="stat-label">Questions</div></div>
+  </div>
+</section>
+
+<!-- ── ASSESSMENT FLOW ──────────────────────────────────────────────────────── -->
+<main id="assessment" class="main-container">
+
+  <!-- Progress bar -->
+  <div class="progress-container" id="progress-bar-container" style="display:none">
+    <div class="progress-steps">
+      <div class="step active" id="step-1-indicator">1. Demographics</div>
+      <div class="step" id="step-2-indicator">2. Questions</div>
+      <div class="step" id="step-3-indicator">3. Results</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:33%"></div>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: Demographics ──────────────────────────────────────────────── -->
+  <section class="card" id="section-demographics">
+    <h2>Before We Begin</h2>
+    <p class="section-sub">This information helps personalise your assessment. All fields are required.</p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" id="age" min="10" max="100" placeholder="e.g. 25"/>
+      </div>
+
+      <div class="form-group">
+        <label>Gender</label>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="gender" value="1"/> Male</label>
+          <label class="radio-option"><input type="radio" name="gender" value="0"/> Female</label>
+          <label class="radio-option"><input type="radio" name="gender" value="-1"/> Prefer not to say</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Marital Status</label>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="marital" value="0"/> Single</label>
+          <label class="radio-option"><input type="radio" name="marital" value="1"/> Married</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="education">Education Level</label>
+        <select id="education">
+          <option value="">Select...</option>
+          <option value="0">Illiterate</option>
+          <option value="1">Primary School</option>
+          <option value="2">SSC (Class 10)</option>
+          <option value="3">HSC (Class 12)</option>
+          <option value="4">Graduation & Above</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="occupation">Occupation</label>
+        <select id="occupation">
+          <option value="">Select...</option>
+          <option value="0">Housewife</option>
+          <option value="1">Service / Job</option>
+          <option value="2">Business</option>
+          <option value="3">Student</option>
+          <option value="4">Day Labour</option>
+          <option value="5">Unemployed</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Do you have sleep problems?</label>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="sleep" value="0"/> No</label>
+          <label class="radio-option"><input type="radio" name="sleep" value="1"/> Yes</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="demo-error"></div>
+    <button class="btn-primary" onclick="submitDemographics()">Continue to Questions →</button>
+  </section>
+
+  <!-- ── STEP 2: Questions ─────────────────────────────────────────────────── -->
+  <section class="card hidden" id="section-questions">
+    <div class="questions-header">
+      <h2>DASS-21 Assessment</h2>
+      <p class="section-sub">
+        Please indicate how much each statement applied to you <strong>over the past week</strong>.
+        Note that there are no right or wrong answers.
+      </p>
+      <div class="response-legend">
+        <span class="legend-item l0">0 — Never</span>
+        <span class="legend-item l1">1 — Sometimes</span>
+        <span class="legend-item l2">2 — Often</span>
+        <span class="legend-item l3">3 — Almost Always</span>
+      </div>
+    </div>
+
+    <div id="questions-container" class="questions-list">
+      <div class="loading-spinner">Loading questions...</div>
+    </div>
+
+    <div class="q-footer">
+      <div class="q-counter" id="q-counter">0 / 21 answered</div>
+      <div class="error-msg" id="q-error"></div>
+      <div class="q-actions">
+        <button class="btn-secondary" onclick="goBack()">← Back</button>
+        <button class="btn-primary" id="submit-btn" onclick="submitAssessment()">
+          Get My Results →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 3: Results ───────────────────────────────────────────────────── -->
+  <section class="card hidden" id="section-results">
+
+    <div class="results-header">
+      <h2>Your Assessment Results</h2>
+      <p class="section-sub">
+        Based on your DASS-21 responses, here is a summary of your current mental health status.
+        Remember: these results are <em>informational only</em> and not a clinical diagnosis.
+      </p>
+    </div>
+
+    <!-- Overall risk badge -->
+    <div class="overall-risk" id="overall-risk-section">
+      <div class="risk-label">Overall Risk Score</div>
+      <div class="risk-score" id="overall-risk-score">—</div>
+      <div class="risk-desc" id="overall-risk-desc">—</div>
+    </div>
+
+    <!-- 3 Condition Cards -->
+    <div class="condition-cards" id="condition-cards"></div>
+
+    <!-- Radar Chart -->
+    <div class="chart-section">
+      <h3>Severity Profile</h3>
+      <p class="section-sub">Visual overview of your scores across all three conditions.</p>
+      <div class="chart-wrapper">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Probability Distribution Charts -->
+    <div class="chart-section">
+      <h3>Prediction Confidence</h3>
+      <p class="section-sub">
+        How confident the model is across all severity levels for each condition.
+      </p>
+      <div class="prob-charts">
+        <div class="prob-chart-wrap">
+          <h4>Stress</h4>
+          <canvas id="stressChart"></canvas>
+        </div>
+        <div class="prob-chart-wrap">
+          <h4>Anxiety</h4>
+          <canvas id="anxietyChart"></canvas>
+        </div>
+        <div class="prob-chart-wrap depression-chart">
+          <h4>Depression</h4>
+          <canvas id="depressionChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comorbidity Index -->
+    <div class="comorbidity-section" id="comorbidity-section">
+      <h3>Comorbidity Index</h3>
+      <p class="section-sub">
+        How many conditions are simultaneously elevated above the clinical threshold.
+      </p>
+      <div class="comorbidity-display" id="comorbidity-display"></div>
+    </div>
+
+    <!-- Feedback Sections per condition -->
+    <div id="feedback-sections"></div>
+
+    <!-- Model Info -->
+    <div class="model-info-section">
+      <h3>About This Model</h3>
+      <div class="model-stats">
+        <div class="mstat"><div class="mstat-label">Stress Kappa</div><div class="mstat-val">0.715</div></div>
+        <div class="mstat"><div class="mstat-label">Anxiety Kappa</div><div class="mstat-val">0.657</div></div>
+        <div class="mstat"><div class="mstat-label">Depression Kappa</div><div class="mstat-val">0.742</div></div>
+        <div class="mstat"><div class="mstat-label">Architecture</div><div class="mstat-val">N=3 Ensemble</div></div>
+      </div>
+    </div>
+
+    <!-- Helplines -->
+    <div class="helplines-section">
+      <h3>📞 Mental Health Helplines (India)</h3>
+      <div class="helplines-grid">
+        <div class="helpline"><strong>iCall</strong><br/>9152987821</div>
+        <div class="helpline"><strong>Vandrevala Foundation</strong><br/>1860-2662-345 (24/7)</div>
+        <div class="helpline"><strong>NIMHANS</strong><br/>080-46110007</div>
+        <div class="helpline"><strong>AASRA</strong><br/>9820466627</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="results-actions">
+      <button class="btn-secondary" onclick="retakeAssessment()">↺ Retake Assessment</button>
+      <button class="btn-primary" onclick="window.print()">🖨 Print Results</button>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ── ABOUT SECTION ─────────────────────────────────────────────────────────── -->
+<section id="about" class="about-section">
+  <div class="about-inner">
+    <h2>About This Tool</h2>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-icon">📊</div>
+        <h3>Research Foundation</h3>
+        <p>Built on the validated DASS-21 questionnaire using a dataset of 1,812 participants from Daffodil International University, Bangladesh.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🤖</div>
+        <h3>AI Model</h3>
+        <p>N=3 Soft Voting Ensemble combining Gradient Boosting, Random Forest, and a Neural Network — achieving Kappa up to 0.742 (substantial agreement).</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🔒</div>
+        <h3>Privacy First</h3>
+        <p>No responses are stored, logged, or shared. Your assessment is processed in memory and immediately discarded.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">⚠️</div>
+        <h3>Important Disclaimer</h3>
+        <p>This tool is for informational and research purposes only. It is not a substitute for professional mental health diagnosis or treatment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── API DOCS ───────────────────────────────────────────────────────────────── -->
+<section id="api-docs" class="api-section">
+  <div class="api-inner">
+    <h2>REST API</h2>
+    <p>This application exposes a REST API for developers and researchers.</p>
+    <div class="api-endpoints">
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/health</code>
+        <span class="ep-desc">Server health check</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/questions</code>
+        <span class="ep-desc">Fetch all 21 DASS-21 questions (shuffled)</span>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <code>/api/predict</code>
+        <span class="ep-desc">Submit demographics + responses → receive predictions</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/model-info</code>
+        <span class="ep-desc">Model architecture + performance metrics</span>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <code>/api/feedback-guide</code>
+        <span class="ep-desc">Severity level descriptions + helplines</span>
+      </div>
+    </div>
+    <div class="api-example">
+      <h4>Example POST /api/predict</h4>
+      <pre><code>{
+  "demographics": {
+    "age": 22, "gender": 1, "marital_status": 0,
+    "education": 3, "occupation": 3, "sleep_problem": 0
+  },
+  "responses": {
+    "q01": 1, "q02": 0, "q03": 2, "q04": 0, "q05": 1,
+    "q06": 2, "q07": 0, "q08": 1, "q09": 1, "q10": 1,
+    "q11": 1, "q12": 2, "q13": 1, "q14": 1, "q15": 0,
+    "q16": 1, "q17": 0, "q18": 1, "q19": 0, "q20": 0, "q21": 0
+  }
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <p>MindCheck — DASS-21 Mental Health Severity Predictor &nbsp;|&nbsp;
+     Built for research purposes &nbsp;|&nbsp;
+     Dataset: Daffodil International University, Bangladesh (DOI: 10.17632/br82d4xkj7.1)
+  </p>
+  <p class="footer-disclaimer">
+    This tool does not store any personal data. Not a substitute for professional mental health care.
+  </p>
+</footer>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

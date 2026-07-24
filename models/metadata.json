@@ -1,0 +1,166 @@
+{
+  "feature_names": [
+    "emotional_instability",
+    "comorbidity_index",
+    "cognitive_score",
+    "physiological_score",
+    "education",
+    "age",
+    "occupation",
+    "sleep_problem",
+    "marital_status",
+    "gender"
+  ],
+  "targets": [
+    "stress_level",
+    "anxiety_level",
+    "depression_level"
+  ],
+  "label_map": {
+    "1": "Normal",
+    "2": "Mild",
+    "3": "Moderate",
+    "4": "Severe",
+    "5": "Extremely Severe"
+  },
+  "dass21_thresholds": {
+    "stress": {
+      "Normal": [
+        0,
+        14
+      ],
+      "Mild": [
+        15,
+        18
+      ],
+      "Moderate": [
+        19,
+        25
+      ],
+      "Severe": [
+        26,
+        33
+      ],
+      "Extremely Severe": [
+        34,
+        42
+      ]
+    },
+    "anxiety": {
+      "Normal": [
+        0,
+        6
+      ],
+      "Mild": [
+        7,
+        9
+      ],
+      "Moderate": [
+        10,
+        13
+      ],
+      "Severe": [
+        14,
+        19
+      ],
+      "Extremely Severe": [
+        20,
+        42
+      ]
+    },
+    "depression": {
+      "Normal": [
+        0,
+        8
+      ],
+      "Mild": [
+        9,
+        12
+      ],
+      "Moderate": [
+        13,
+        20
+      ],
+      "Severe": [
+        21,
+        27
+      ],
+      "Extremely Severe": [
+        28,
+        42
+      ]
+    }
+  },
+  "comorbidity_thresholds": {
+    "stress_score": 14,
+    "anxiety_score": 6,
+    "depression_score": 8
+  },
+  "feature_engineering": {
+    "cognitive_score": [
+      "depression_1",
+      "depression_2",
+      "depression_3",
+      "depression_4"
+    ],
+    "physiological_score": [
+      "anxiety_1",
+      "anxiety_2",
+      "anxiety_3",
+      "anxiety_4"
+    ],
+    "emotional_instability": "mean(sum(stress_1..7) + sum(anxiety_1..7)) / 2",
+    "comorbidity_index": "count of conditions above mild threshold (0-3)"
+  },
+  "model_info": {
+    "architecture": "N=3 Soft Voting Ensemble (HistGBM + RandomForest + MLP)",
+    "training_size": 1449,
+    "test_size": 363,
+    "performance": {
+      "stress": {
+        "accuracy": 0.799,
+        "f1_macro": 0.714,
+        "kappa": 0.715
+      },
+      "anxiety": {
+        "accuracy": 0.749,
+        "f1_macro": 0.669,
+        "kappa": 0.657
+      },
+      "depression": {
+        "accuracy": 0.804,
+        "f1_macro": 0.76,
+        "kappa": 0.742
+      }
+    }
+  },
+  "demographic_encodings": {
+    "gender": {
+      "0": "Female",
+      "1": "Male"
+    },
+    "marital_status": {
+      "0": "Single",
+      "1": "Married"
+    },
+    "education": {
+      "0": "Illiterate",
+      "1": "Primary",
+      "2": "SSC",
+      "3": "HSC",
+      "4": "Graduation+"
+    },
+    "occupation": {
+      "0": "Housewife",
+      "1": "Service",
+      "2": "Business",
+      "3": "Student",
+      "4": "Day Labor",
+      "5": "Unemployed"
+    },
+    "sleep_problem": {
+      "0": "No",
+      "1": "Yes"
+    }
+  }
+}
