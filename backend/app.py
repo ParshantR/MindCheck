@@ -8,7 +8,7 @@ Endpoints:
   GET  /api/model-info      → model architecture and performance metrics
 """
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import numpy as np
 import joblib
@@ -16,7 +16,7 @@ import json
 import os
 import random
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)   # allow frontend (different port) to call this API
 
 # ── Load models & metadata once at startup ────────────────────────────────────
@@ -330,6 +330,9 @@ def run_prediction(age, gender, marital_status, education, occupation,
 # ══════════════════════════════════════════════════════════════════════════════
 # REST API ENDPOINTS
 # ══════════════════════════════════════════════════════════════════════════════
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/api/health", methods=["GET"])
 def health():
@@ -513,5 +516,11 @@ def feedback_guide():
     })
 
 
+import os
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False
+    )
