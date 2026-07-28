@@ -278,23 +278,29 @@ function renderResults(data) {
   });
 
   // ── Probability Distribution Charts ─────────────────────────────────────────
-  const levels = ["Normal","Mild","Moderate","Severe","Extremely Severe"];
-  const probColors = ["#10b981","#f59e0b","#f97316","#ef4444","#8b5cf6"];
+const levels = ["Normal","Mild","Moderate","Severe","Extremely Severe"];
+const probColors = ["#10b981","#f59e0b","#f97316","#ef4444","#8b5cf6"];
 
-  destroyChart(stressChart);
-  stressChart = makeProbChart("stressChart",
-    Object.values(predictions.stress.probabilities), levels, probColors
-  );
+// Extract probabilities EXPLICITLY by key — never use Object.values()
+// because JSON key order is not guaranteed across all environments
+function extractProbs(probObj) {
+  return levels.map(level => probObj[level] || 0);
+}
 
-  destroyChart(anxietyChart);
-  anxietyChart = makeProbChart("anxietyChart",
-    Object.values(predictions.anxiety.probabilities), levels, probColors
-  );
+destroyChart(stressChart);
+stressChart = makeProbChart("stressChart",
+  extractProbs(predictions.stress.probabilities), levels, probColors
+);
 
-  destroyChart(depressionChart);
-  depressionChart = makeProbChart("depressionChart",
-    Object.values(predictions.depression.probabilities), levels, probColors
-  );
+destroyChart(anxietyChart);
+anxietyChart = makeProbChart("anxietyChart",
+  extractProbs(predictions.anxiety.probabilities), levels, probColors
+);
+
+destroyChart(depressionChart);
+depressionChart = makeProbChart("depressionChart",
+  extractProbs(predictions.depression.probabilities), levels, probColors
+);
 
   // ── Comorbidity Index ────────────────────────────────────────────────────────
   const ci = data.comorbidity_index;
