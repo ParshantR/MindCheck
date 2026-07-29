@@ -202,6 +202,10 @@ async function submitAssessment() {
       return;
     }
 
+    // Re-enable button BEFORE hiding the section — so retake works
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Get My Results →";
+
     renderResults(data.data);
 
   } catch (err) {
@@ -399,12 +403,37 @@ function getOverallDescription(score) {
 
 // ── Retake ────────────────────────────────────────────────────────────────────
 function retakeAssessment() {
+  // Destroy all charts so they don't overlap on next submission
+  destroyChart(radarChart);
+  destroyChart(stressChart);
+  destroyChart(anxietyChart);
+  destroyChart(depressionChart);
+  radarChart      = null;
+  stressChart     = null;
+  anxietyChart    = null;
+  depressionChart = null;
+
+  // Reset all state
   answers      = {};
   questions    = [];
   demographics = {};
-  document.getElementById("section-results").classList.add("hidden");
-  document.getElementById("section-demographics").classList.remove("hidden");
+
+  // Reset submit button in case user is retaking
+  const submitBtn = document.getElementById("submit-btn");
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Get My Results →";
+  }
+
+  // Clear any error messages
   document.getElementById("demo-error").textContent = "";
+  const qError = document.getElementById("q-error");
+  if (qError) qError.textContent = "";
+
+  // Navigate back to step 1
+  document.getElementById("section-results").classList.add("hidden");
+  document.getElementById("section-questions").classList.add("hidden");
+  document.getElementById("section-demographics").classList.remove("hidden");
   setStep(1);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
